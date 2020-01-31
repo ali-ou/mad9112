@@ -1,9 +1,12 @@
 const cars = require('../data/cars')
+const validateCarId = require('../middleware/validateCarId')
 const express = require('express')
 const router = express.Router()
 
+router.use('/:carId',validateCarId)
 
-router.get('/', (req, res) => res.send({ data: cars }))
+
+router.get('/', (req, res) => res.send({ data: cars}))
 
 router.get('/:carId', (req, res) => {
     const carId = parseInt(req.params.carId)
@@ -24,62 +27,24 @@ router.post('/', (req, res) => {
 })
 
 router.put('/:carId', (req, res) => {
-    const carId = parseInt(req.params.carId)
-    const index = cars.findIndex(car => car.id === carId)
-    if (index < 0) {
-    res.status(404).send({
-        errors: [{
-        status: 'Not Found',
-        code: '404',
-        title: 'Resource does not exist',
-        description: `We could not find a car with id: ${carId}`
-        }]
-    })
-    } else {
     const { make, model, colour } = req.body
       const updatedCar = { id: carId, make, model, colour }
       cars[index] = updatedCar
       res.send({ data: updatedCar })
-    }
   })
   
   router.patch('/:carId', (req, res) => {
-    const carId = parseInt(req.params.carId)
-    const index = cars.findIndex(car => car.id === carId)
-    if (index < 0) {
-      res.status(404).send({
-        errors: [{
-          status: 'Not Found',
-          code: '404',
-          title: 'Resource does not exist',
-          description: `We could not find a car with id: ${carId}`
-        }]
-      })
-    } else {
       const { id, ...theRest } = req.body
-      const updatedCar = Object.assign({}, cars[index], theRest)
-      cars[index] = updatedCar
+      const updatedCar = Object.assign({}, cars[req.carIndex], theRest)
+      cars[req.carIndex] = updatedCar
       res.send({ data: updatedCar })
-    }
   })
   
   router.delete('/:carId', (req, res) => {
-    const carId = parseInt(req.params.carId)
-    const index = cars.findIndex(car => car.id === carId)
-    if (index < 0) {
-      res.status(404).send({
-        errors: [{
-          status: 'Not Found',
-          code: '404',
-          title: 'Resource does not exist',
-          description: `We could not find a car with id: ${carId}`
-        }]
-      })
-    } else {
-      const deletedCar = cars[index]
+      const deletedCar = cars[req.carIndex]
       cars.splice(index, 1)
       res.send({ data: deletedCar })
-    }
+    
   })
 
 
